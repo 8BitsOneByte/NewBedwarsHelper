@@ -22,6 +22,7 @@
     "isp.IspEntityInvisibilityMixin",
     "esp.blockentity.LevelRendererChestOutlineMixin",
     "fireballhelper.LevelRendererFireballHelperMixin",
+    "trajectoryprediction.LevelExtractorTrajectoryPredictionMixin",
     "gammaoverride.LightmapRenderStateExtractorMixin",
     "enemystatusviewer.PlayerTeamSidebarProtectionMixin",
     "esp.blockentity.ShulkerBoxOutlineMixin",

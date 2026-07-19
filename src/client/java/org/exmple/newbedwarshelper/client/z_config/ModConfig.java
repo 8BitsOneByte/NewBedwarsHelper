@@ -24,6 +24,7 @@ public class ModConfig {
     public ItemModelEnhanceConfig itemModelEnhance = new ItemModelEnhanceConfig();
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
     public GammaOverrideConfig gammaOverride = new GammaOverrideConfig();
+    public TrajectoryPredictionConfig trajectoryPrediction = new TrajectoryPredictionConfig();
 
     public static ModConfig getInstance() {
         if (instance == null) {
@@ -91,12 +92,16 @@ public class ModConfig {
         if (gammaOverride == null) {
             gammaOverride = new GammaOverrideConfig();
         }
+        if (trajectoryPrediction == null) {
+            trajectoryPrediction = new TrajectoryPredictionConfig();
+        }
         esp.ensureDefaults();
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
         itemModelEnhance.ensureDefaults();
         statsFetcher.ensureDefaults();
         gammaOverride.ensureDefaults();
+        trajectoryPrediction.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -198,6 +203,51 @@ public class ModConfig {
             if (mode == null) {
                 mode = GammaOverrideMode.NIGHT_VISION;
             }
+        }
+    }
+
+    public static class TrajectoryPredictionConfig {
+        public Boolean projectileEnabled = true;
+        public Boolean arrowEnabled = true;
+        public Integer projectileColor = 0x57FFE1;
+        public Integer arrowColor = 0xF4C95D;
+        public Float lineWidth = 1.5F;
+        public Float transparency = 0.72F;
+        public Double maxLength = 96.0D;
+        public Integer samplingPrecision = 2;
+
+        private void ensureDefaults() {
+            if (projectileEnabled == null) {
+                projectileEnabled = true;
+            }
+            if (arrowEnabled == null) {
+                arrowEnabled = true;
+            }
+            if (projectileColor == null) {
+                projectileColor = 0x57FFE1;
+            }
+            if (arrowColor == null) {
+                arrowColor = 0xF4C95D;
+            }
+            if (lineWidth == null) {
+                lineWidth = 1.5F;
+            }
+            if (transparency == null) {
+                transparency = 0.72F;
+            }
+            if (maxLength == null) {
+                maxLength = 96.0D;
+            }
+            if (samplingPrecision == null) {
+                samplingPrecision = 2;
+            }
+
+            projectileColor &= 0xFFFFFF;
+            arrowColor &= 0xFFFFFF;
+            lineWidth = Math.max(0.5F, Math.min(4.0F, lineWidth));
+            transparency = Math.max(0.1F, Math.min(1.0F, transparency));
+            maxLength = Math.max(16.0D, Math.min(256.0D, maxLength));
+            samplingPrecision = Math.max(1, Math.min(4, samplingPrecision));
         }
     }
 

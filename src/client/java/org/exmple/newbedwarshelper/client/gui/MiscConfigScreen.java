@@ -13,6 +13,7 @@ public class MiscConfigScreen extends Screen {
     private static final Component ANTI_AFK_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.anti_afk");
     private static final Component GAMMA_OVERRIDE_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.gamma_override");
     private static final Component BLOCK_ESP_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.block_esp");
+    private static final Component TRAJECTORY_PREDICTION_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.trajectory_prediction");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.misc.done");
     private static final int BUTTON_WIDTH = 150;
 
@@ -35,6 +36,9 @@ public class MiscConfigScreen extends Screen {
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(50));
         helper.addChild(Button.builder(BLOCK_ESP_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new BlockEspConfigScreen(this.minecraft, this)))
+                .width(BUTTON_WIDTH)
+                .build(), gridLayout.newCellSettings().paddingTop(5));
+        helper.addChild(Button.builder(TRAJECTORY_PREDICTION_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new TrajectoryPredictionConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())
