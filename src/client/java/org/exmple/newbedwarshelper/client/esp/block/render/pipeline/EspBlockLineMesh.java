@@ -3,6 +3,7 @@ package org.exmple.newbedwarshelper.client.esp.block.render.pipeline;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.phys.AABB;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -39,6 +40,21 @@ public final class EspBlockLineMesh {
         this.indices.putInt(first);
         this.indices.putInt(first + 1);
         this.indexCount += 2;
+    }
+
+    public void box(AABB box, int argb, double cameraX, double cameraY, double cameraZ) {
+        this.line(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.minZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.minY, box.maxZ, box.minX, box.maxY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.maxX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.minZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.minY, box.maxZ, box.maxX, box.minY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.minZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.maxY, box.maxZ, box.maxX, box.maxY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.minY, box.minZ, box.minX, box.minY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.maxX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.minX, box.maxY, box.minZ, box.minX, box.maxY, box.maxZ, argb, cameraX, cameraY, cameraZ);
+        this.line(box.maxX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ, argb, cameraX, cameraY, cameraZ);
     }
 
     public boolean isEmpty() {
