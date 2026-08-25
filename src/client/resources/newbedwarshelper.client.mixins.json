@@ -4,7 +4,6 @@
   "package": "org.exmple.newbedwarshelper.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "esp.blockentity.ChestOutlineMixin",
     "esp.block.ClientPacketListenerBlockEspChunkMixin",
     "esp.block.GameRendererBlockEspMixin",
     "esp.block.LevelChunkBlockEspUpdateMixin",
@@ -21,11 +20,12 @@
     "esp.entity.ItemEntityOutlineMixin",
     "itemmodelenhance.ItemEntityRenderStateScaleMixin",
     "isp.IspEntityInvisibilityMixin",
-    "esp.blockentity.LevelRendererChestOutlineMixin",
+    "fireballhelper.GameRendererFireballDangerMixin",
+    "fireballhelper.LevelRendererFireballImpactBeamMixin",
     "fireballhelper.LevelRendererFireballHelperMixin",
     "gammaoverride.LightmapRenderStateExtractorMixin",
+    "toolswitcher.ClientPacketListenerToolSwitcherDamageMixin",
     "enemystatusviewer.PlayerTeamSidebarProtectionMixin",
-    "esp.blockentity.ShulkerBoxOutlineMixin",
     "esp.entity.WindChargeOutlineMixin",
     "esp.entity.WitherSkullOutlineMixin"
   ],

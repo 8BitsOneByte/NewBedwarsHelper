@@ -3,7 +3,6 @@ package org.exmple.newbedwarshelper.client.esp.block.render;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
-import org.exmple.newbedwarshelper.client.esp.block.EspBlockTarget;
 import org.exmple.newbedwarshelper.client.esp.block.render.navigation.EspBlockNavigationController;
 
 import java.util.ArrayList;
@@ -15,11 +14,14 @@ import java.util.function.Consumer;
 
 public final class EspBlockChunkCache {
     private final Map<Long, EspBlockChunk> chunks = new HashMap<>();
+    private long revision;
+    private EspBlockSpatialSnapshot cachedSpatialSnapshot;
 
     public synchronized void replaceChunk(ChunkPos pos, List<EspBlockCacheEntry> entries) {
         long key = ChunkPos.pack(pos.x(), pos.z());
         if (entries.isEmpty()) {
             this.chunks.remove(key);
+            this.markChanged();
             EspBlockNavigationController.markDirty();
             return;
         }
@@ -33,10 +35,11 @@ public final class EspBlockChunkCache {
         for (EspBlockCacheEntry entry : entries) {
             this.updateNeighboursAround(entry.pos());
         }
+        this.markChanged();
         EspBlockNavigationController.markDirty();
     }
 
-    public synchronized void updateBlock(BlockPos pos, EspBlockTarget target, Block block, net.minecraft.world.phys.AABB bounds, int color) {
+    public synchronized void updateBlock(BlockPos pos, EspBlockRenderTarget target, Block block, net.minecraft.world.phys.AABB bounds, int color) {
         ChunkPos chunkPos = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
         long key = ChunkPos.pack(chunkPos.x(), chunkPos.z());
         EspBlockChunk chunk = this.chunks.get(key);
@@ -47,6 +50,7 @@ public final class EspBlockChunkCache {
 
         chunk.put(new EspBlockCacheEntry(pos.immutable(), target, block, bounds, color));
         this.updateNeighboursAround(pos);
+        this.markChanged();
         EspBlockNavigationController.markDirty();
     }
 
@@ -62,12 +66,15 @@ public final class EspBlockChunkCache {
         if (chunk.isEmpty()) {
             this.chunks.remove(key);
         }
+        this.markChanged();
         EspBlockNavigationController.markDirty();
     }
 
     public synchronized void removeChunk(ChunkPos pos) {
-        this.chunks.remove(ChunkPos.pack(pos.x(), pos.z()));
-        EspBlockNavigationController.markDirty();
+        if (this.chunks.remove(ChunkPos.pack(pos.x(), pos.z())) != null) {
+            this.markChanged();
+            EspBlockNavigationController.markDirty();
+        }
     }
 
     public synchronized int removeOutside(int centerChunkX, int centerChunkZ, int chunkRadius) {
@@ -85,13 +92,18 @@ public final class EspBlockChunkCache {
         }
 
         if (removed > 0) {
+            this.markChanged();
             EspBlockNavigationController.markDirty();
         }
         return removed;
     }
 
     public synchronized void clear() {
+        if (this.chunks.isEmpty()) {
+            return;
+        }
         this.chunks.clear();
+        this.markChanged();
         EspBlockNavigationController.markDirty();
     }
 
@@ -115,10 +127,40 @@ public final class EspBlockChunkCache {
         return snapshot;
     }
 
+    public synchronized EspBlockSpatialSnapshot spatialSnapshot() {
+        if (this.cachedSpatialSnapshot != null) {
+            return this.cachedSpatialSnapshot;
+        }
+
+        List<EspBlockSpatialSnapshot.ChunkEntries> chunkSnapshots = new ArrayList<>(this.chunks.size());
+        for (EspBlockChunk chunk : this.chunks.values()) {
+            chunkSnapshots.add(new EspBlockSpatialSnapshot.ChunkEntries(chunk.pos(), List.copyOf(chunk.snapshot())));
+        }
+        this.cachedSpatialSnapshot = new EspBlockSpatialSnapshot(this.revision, List.copyOf(chunkSnapshots));
+        return this.cachedSpatialSnapshot;
+    }
+
+    public synchronized List<EspBlockCacheEntry> entriesAt(Iterable<Long> packedPositions) {
+        List<EspBlockCacheEntry> entries = new ArrayList<>();
+        for (Long packedPos : packedPositions) {
+            BlockPos pos = BlockPos.of(packedPos);
+            EspBlockCacheEntry entry = this.get(pos);
+            if (entry != null) {
+                entries.add(entry);
+            }
+        }
+        return entries;
+    }
+
     public synchronized void forEachEntry(Consumer<EspBlockCacheEntry> consumer) {
         for (EspBlockChunk chunk : this.chunks.values()) {
             chunk.forEachEntry(consumer);
         }
+    }
+
+    private void markChanged() {
+        this.revision++;
+        this.cachedSpatialSnapshot = null;
     }
 
     private EspBlockCacheEntry get(BlockPos pos) {

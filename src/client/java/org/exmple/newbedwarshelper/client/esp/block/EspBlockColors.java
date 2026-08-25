@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class EspBlockColors {
-    public static final int DEFAULT_COLOR = 0x00FFFF;
+    public static final int DEFAULT_COLOR = 0xFF55DD;
 
     private EspBlockColors() {
     }

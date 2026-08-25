@@ -6,8 +6,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import org.exmple.newbedwarshelper.client.esp.block.EspBlockStorage;
-import org.exmple.newbedwarshelper.client.esp.block.EspBlockTarget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ public final class EspBlockChunkScanner {
                     int z = chunkPos.getMinBlockZ() + localZ;
                     for (int localX = 0; localX < 16; localX++) {
                         BlockState state = section.getBlockState(localX, localY, localZ);
-                        EspBlockTarget target = EspBlockStorage.targetForBlock(state.getBlock());
+                        EspBlockRenderTarget target = EspBlockRenderTargetResolver.targetForBlock(state.getBlock());
                         if (target != null) {
                             int x = chunkPos.getMinBlockX() + localX;
                             BlockPos pos = new BlockPos(x, y, z);

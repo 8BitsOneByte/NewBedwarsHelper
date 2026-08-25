@@ -14,7 +14,7 @@ import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 
 public final class EspBlockRenderer {
-    private static final int MAX_LINES_PER_FRAME = 1_500_000;
+    private static final int MAX_LINES_PER_FRAME = 10_000;
 
     private static final EspBlockLineMesh THROUGH_WALL_MESH = new EspBlockLineMesh();
 
@@ -29,17 +29,18 @@ public final class EspBlockRenderer {
         THROUGH_WALL_MESH.begin();
         EspBlockNavigationController.update(client);
         LineSink throughWallSink = new LineSink(client, THROUGH_WALL_MESH);
-        EspBlockEspController.forEachEntry(entry -> {
-            if (!EspBlockNavigationController.shouldUseAimedNavigationColor(entry)) {
-                emitEntry(entry, throughWallSink);
-            }
-        });
         EspBlockTracerRenderer.render(throughWallSink, EspBlockNavigationController.nearestGroup(), screenCenterWorld(projectionMatrix, modelViewMatrix, throughWallSink.cameraPos()));
+        for (EspBlockSelectedRenderEntry selectedEntry : EspBlockEspController.renderSelection().entries()) {
+            if (!EspBlockNavigationController.shouldUseAimedNavigationColor(selectedEntry.entry())) {
+                emitEntry(selectedEntry, throughWallSink);
+            }
+        }
         EspBlockLineRenderer.render(THROUGH_WALL_MESH, modelViewMatrix, EspBlockRenderPipelines.BLOCK_ESP_LINES);
     }
 
-    private static void emitEntry(EspBlockCacheEntry entry, LineSink sink) {
-        int neighbours = entry.neighbours();
+    private static void emitEntry(EspBlockSelectedRenderEntry selectedEntry, LineSink sink) {
+        EspBlockCacheEntry entry = selectedEntry.entry();
+        int neighbours = selectedEntry.neighbours();
         AABB bounds = entry.bounds();
         double x1 = entry.pos().getX() + bounds.minX;
         double y1 = entry.pos().getY() + bounds.minY;
@@ -52,60 +53,41 @@ public final class EspBlockRenderer {
             color = EspBlockNavigationConstants.NAVIGATION_COLOR;
         }
 
-        sink.renderedBlocks++;
-        if (neighbours == 0) {
-            emitFullBox(sink, x1, y1, z1, x2, y2, z2, color);
-            return;
-        }
-
-        if (((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA)
-                || ((neighbours & EspBlockNeighbourFlags.LE) == EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.BA) == EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.BA_LE) != EspBlockNeighbourFlags.BA_LE)) {
+        int edges = EspBlockLineGeometry.edgeMask(neighbours);
+        if ((edges & EspBlockLineGeometry.X1_Z1_VERTICAL) != 0) {
             sink.line(x1, y1, z1, x1, y2, z1, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO)
-                || ((neighbours & EspBlockNeighbourFlags.LE) == EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.FO) == EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.FO_LE) != EspBlockNeighbourFlags.FO_LE)) {
+        if ((edges & EspBlockLineGeometry.X1_Z2_VERTICAL) != 0) {
             sink.line(x1, y1, z2, x1, y2, z2, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA)
-                || ((neighbours & EspBlockNeighbourFlags.RI) == EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.BA) == EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.BA_RI) != EspBlockNeighbourFlags.BA_RI)) {
+        if ((edges & EspBlockLineGeometry.X2_Z1_VERTICAL) != 0) {
             sink.line(x2, y1, z1, x2, y2, z1, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO)
-                || ((neighbours & EspBlockNeighbourFlags.RI) == EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.FO) == EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.FO_RI) != EspBlockNeighbourFlags.FO_RI)) {
+        if ((edges & EspBlockLineGeometry.X2_Z2_VERTICAL) != 0) {
             sink.line(x2, y1, z2, x2, y2, z2, color);
         }
-
-        if (((neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.BO) != EspBlockNeighbourFlags.BO)
-                || ((neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.BO_BA) == EspBlockNeighbourFlags.BO_BA)) {
+        if ((edges & EspBlockLineGeometry.BOTTOM_BACK_X) != 0) {
             sink.line(x1, y1, z1, x2, y1, z1, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.BO) != EspBlockNeighbourFlags.BO)
-                || ((neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.BO_FO) == EspBlockNeighbourFlags.BO_FO)) {
+        if ((edges & EspBlockLineGeometry.BOTTOM_FRONT_X) != 0) {
             sink.line(x1, y1, z2, x2, y1, z2, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.TO) != EspBlockNeighbourFlags.TO)
-                || ((neighbours & EspBlockNeighbourFlags.BA) != EspBlockNeighbourFlags.BA && (neighbours & EspBlockNeighbourFlags.TO_BA) == EspBlockNeighbourFlags.TO_BA)) {
+        if ((edges & EspBlockLineGeometry.TOP_BACK_X) != 0) {
             sink.line(x1, y2, z1, x2, y2, z1, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.TO) != EspBlockNeighbourFlags.TO)
-                || ((neighbours & EspBlockNeighbourFlags.FO) != EspBlockNeighbourFlags.FO && (neighbours & EspBlockNeighbourFlags.TO_FO) == EspBlockNeighbourFlags.TO_FO)) {
+        if ((edges & EspBlockLineGeometry.TOP_FRONT_X) != 0) {
             sink.line(x1, y2, z2, x2, y2, z2, color);
         }
-
-        if (((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.BO) != EspBlockNeighbourFlags.BO)
-                || ((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.BO_LE) == EspBlockNeighbourFlags.BO_LE)) {
+        if ((edges & EspBlockLineGeometry.BOTTOM_LEFT_Z) != 0) {
             sink.line(x1, y1, z1, x1, y1, z2, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.BO) != EspBlockNeighbourFlags.BO)
-                || ((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.BO_RI) == EspBlockNeighbourFlags.BO_RI)) {
+        if ((edges & EspBlockLineGeometry.BOTTOM_RIGHT_Z) != 0) {
             sink.line(x2, y1, z1, x2, y1, z2, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.TO) != EspBlockNeighbourFlags.TO)
-                || ((neighbours & EspBlockNeighbourFlags.LE) != EspBlockNeighbourFlags.LE && (neighbours & EspBlockNeighbourFlags.TO_LE) == EspBlockNeighbourFlags.TO_LE)) {
+        if ((edges & EspBlockLineGeometry.TOP_LEFT_Z) != 0) {
             sink.line(x1, y2, z1, x1, y2, z2, color);
         }
-        if (((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.TO) != EspBlockNeighbourFlags.TO)
-                || ((neighbours & EspBlockNeighbourFlags.RI) != EspBlockNeighbourFlags.RI && (neighbours & EspBlockNeighbourFlags.TO_RI) == EspBlockNeighbourFlags.TO_RI)) {
+        if ((edges & EspBlockLineGeometry.TOP_RIGHT_Z) != 0) {
             sink.line(x2, y2, z1, x2, y2, z2, color);
         }
     }
@@ -118,27 +100,11 @@ public final class EspBlockRenderer {
         return new Vec3(cameraPos.x + center.x, cameraPos.y + center.y, cameraPos.z + center.z);
     }
 
-    private static void emitFullBox(LineSink sink, double x1, double y1, double z1, double x2, double y2, double z2, int color) {
-        sink.line(x1, y1, z1, x1, y2, z1, color);
-        sink.line(x1, y1, z2, x1, y2, z2, color);
-        sink.line(x2, y1, z1, x2, y2, z1, color);
-        sink.line(x2, y1, z2, x2, y2, z2, color);
-        sink.line(x1, y1, z1, x2, y1, z1, color);
-        sink.line(x1, y1, z2, x2, y1, z2, color);
-        sink.line(x1, y2, z1, x2, y2, z1, color);
-        sink.line(x1, y2, z2, x2, y2, z2, color);
-        sink.line(x1, y1, z1, x1, y1, z2, color);
-        sink.line(x2, y1, z1, x2, y1, z2, color);
-        sink.line(x1, y2, z1, x1, y2, z2, color);
-        sink.line(x2, y2, z1, x2, y2, z2, color);
-    }
-
     private static final class LineSink implements EspBlockTracerRenderer.LineEmitter {
         private final double cameraX;
         private final double cameraY;
         private final double cameraZ;
         private final EspBlockLineMesh mesh;
-        private int renderedBlocks;
         private int emittedLines;
         private int skippedLines;
 

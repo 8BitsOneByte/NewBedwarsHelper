@@ -14,8 +14,6 @@ import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.phys.Vec3;
-import org.exmple.newbedwarshelper.client.esp.EspGlobalState;
-import org.exmple.newbedwarshelper.client.esp.entity.EspEntityStorage;
 
 import java.util.List;
 
@@ -28,12 +26,9 @@ public final class PlayerThroughWallRenderer {
             LevelRenderState levelState,
             SubmitNodeCollector output
     ) {
-        boolean configured = PlayerThroughWallEsp.isConfiguredEnabled();
-        boolean globalEnabled = EspGlobalState.isEnabled();
-        boolean playerWhitelisted = EspEntityStorage.isEntityTypeEspEnabled(EntityTypes.PLAYER);
         int playerStateCount = countPlayerStates(levelState);
 
-        if (!configured || !globalEnabled || !playerWhitelisted || minecraft.level == null || playerStateCount == 0) {
+        if (!PlayerThroughWallEsp.shouldRender() || minecraft.level == null || playerStateCount == 0) {
             return;
         }
 

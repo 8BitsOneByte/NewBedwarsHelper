@@ -5,7 +5,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.exmple.newbedwarshelper.client.esp.EspStorageManager;
-import org.exmple.newbedwarshelper.client.esp.block.EspBlockStorage;
 
 public final class EspBlockScanScheduler {
     private static final int RESCAN_LOADED_CHUNKS_INTERVAL_TICKS = 20 * 30;
@@ -53,7 +52,7 @@ public final class EspBlockScanScheduler {
         return client.level != null
                 && client.player != null
                 && EspStorageManager.isGlobalEspEnabled()
-                && EspBlockStorage.hasAnyEnabledBlockTarget();
+                && EspBlockRenderTargetResolver.hasAnyEnabledTarget();
     }
 
     public void clear() {

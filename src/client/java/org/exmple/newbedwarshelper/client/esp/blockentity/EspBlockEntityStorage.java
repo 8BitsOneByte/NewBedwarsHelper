@@ -1,9 +1,10 @@
 package org.exmple.newbedwarshelper.client.esp.blockentity;
 
-import org.exmple.newbedwarshelper.client.esp.EspGlobalState;
+import net.minecraft.world.level.block.Block;
 import org.exmple.newbedwarshelper.client.esp.EspTempToggleMode;
 import org.exmple.newbedwarshelper.client.esp.EspTargetWhitelist;
 import org.exmple.newbedwarshelper.client.esp.EspToggleAction;
+import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockEspController;
 import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
 import java.util.LinkedHashMap;
@@ -26,19 +27,25 @@ public final class EspBlockEntityStorage {
         initialized = true;
     }
 
-    public static synchronized boolean shouldGlowBlockEntity(EspBlockEntityTarget target) {
-        init();
-
-        if (!EspGlobalState.isEnabled()) {
-            return false;
-        }
-
-        return isBlockEntityTargetEspEnabled(target);
-    }
-
     public static synchronized boolean isBlockEntityTargetEspEnabled(EspBlockEntityTarget target) {
         init();
         return BLOCK_ENTITY_TARGETS.isEnabled(target);
+    }
+
+    public static synchronized EspBlockEntityTarget targetForBlock(Block block) {
+        init();
+        EspBlockEntityTarget target = EspBlockEntityGroups.targetForBlock(block);
+        return target != null && BLOCK_ENTITY_TARGETS.isEnabled(target) ? target : null;
+    }
+
+    public static synchronized boolean hasAnyEnabledBlockEntityTarget() {
+        init();
+        for (EspBlockEntityTarget target : BLOCK_ENTITY_TARGETS.persistentTargetKeys()) {
+            if (BLOCK_ENTITY_TARGETS.isEnabled(target)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static synchronized boolean isBlockEntityTargetPersistentlyEspEnabled(EspBlockEntityTarget target) {
@@ -50,12 +57,14 @@ public final class EspBlockEntityStorage {
         init();
         BLOCK_ENTITY_TARGETS.setEnabled(target, enabled);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void setBlockEntityTargetsEspEnabled(List<EspBlockEntityTarget> targets, boolean enabled) {
         init();
         BLOCK_ENTITY_TARGETS.setAllEnabled(targets, enabled);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized EspToggleAction getNextBlockEntityGroupToggleAction(List<EspBlockEntityTarget> targets) {
@@ -67,6 +76,7 @@ public final class EspBlockEntityStorage {
         init();
         BLOCK_ENTITY_TARGETS.applyNextGroupToggleAction(targets);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized EspTempToggleMode getBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets) {
@@ -77,26 +87,30 @@ public final class EspBlockEntityStorage {
     public static synchronized void cycleBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets) {
         init();
         BLOCK_ENTITY_TARGETS.cycleGroupTempToggleMode(targets);
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void setBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets, EspTempToggleMode mode) {
         init();
         BLOCK_ENTITY_TARGETS.setGroupTempToggleMode(targets, mode);
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void clearTemporaryOverrides() {
         BLOCK_ENTITY_TARGETS.clearTemporaryOverrides();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void resetWhitelistToDefaults() {
         init();
         BLOCK_ENTITY_TARGETS.resetToDefaults();
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     private static Map<EspBlockEntityTarget, Boolean> createDefaultBlockEntityWhitelist() {
         Map<EspBlockEntityTarget, Boolean> whitelist = new LinkedHashMap<>();
-        for (EspBlockEntityTarget target : EspBlockEntityTarget.values()) {
+        for (EspBlockEntityTarget target : EspBlockEntityGroups.ALL_TARGETS) {
             whitelist.put(target, Boolean.FALSE);
         }
 

@@ -19,7 +19,7 @@ public class LevelRendererFireballHelperMixin {
     private Minecraft minecraft;
 
     @Inject(method = "extract", at = @At("TAIL"))
-    private void newbedwarshelper$emitFireballTargetHighlight(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
-        FireballHelper.emitTargetHighlight(this.minecraft, deltaPartialTick);
+    private void newbedwarshelper$emitFireballDangerPrediction(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
+        FireballHelper.emitDangerPrediction(this.minecraft, deltaPartialTick);
     }
 }

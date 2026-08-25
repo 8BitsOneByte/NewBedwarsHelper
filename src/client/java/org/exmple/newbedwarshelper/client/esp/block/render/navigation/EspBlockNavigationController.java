@@ -8,9 +8,11 @@ import net.minecraft.world.phys.Vec3;
 import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockCacheEntry;
 import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockEspController;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public final class EspBlockNavigationController {
     private static final EspBlockNavigationIndex INDEX = new EspBlockNavigationIndex();
-    private static boolean dirty = true;
+    private static final AtomicBoolean DIRTY = new AtomicBoolean(true);
     private static EspBlockNavigationGroup nearestGroup;
     private static BlockPos suppressedPos;
 
@@ -18,7 +20,7 @@ public final class EspBlockNavigationController {
     }
 
     public static void markDirty() {
-        dirty = true;
+        DIRTY.set(true);
     }
 
     public static void update(Minecraft client) {
@@ -29,9 +31,8 @@ public final class EspBlockNavigationController {
             return;
         }
 
-        if (dirty) {
+        if (DIRTY.getAndSet(false)) {
             INDEX.rebuild(EspBlockEspController.snapshot());
-            dirty = false;
         }
 
         Vec3 origin = client.gameRenderer.mainCamera().position();

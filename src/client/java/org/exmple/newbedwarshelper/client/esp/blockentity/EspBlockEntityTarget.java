@@ -1,24 +1,19 @@
 package org.exmple.newbedwarshelper.client.esp.blockentity;
 
-public enum EspBlockEntityTarget {
-    CHEST("chest", "block_entity.newbedwarshelper.chest"),
-    TRAPPED_CHEST("trapped_chest", "block_entity.newbedwarshelper.trapped_chest"),
-    ENDER_CHEST("ender_chest", "block_entity.newbedwarshelper.ender_chest"),
-    SHULKER_BOX("shulker_box", "block_entity.newbedwarshelper.shulker_box");
+import net.minecraft.util.ARGB;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockRenderTarget;
 
-    private final String id;
-    private final String translationKey;
+import java.util.List;
 
-    EspBlockEntityTarget(String id, String translationKey) {
-        this.id = id;
-        this.translationKey = translationKey;
+public record EspBlockEntityTarget(String id, String translationKey, List<Block> blocks, int color) implements EspBlockRenderTarget {
+    public EspBlockEntityTarget {
+        blocks = List.copyOf(blocks);
     }
 
-    public String id() {
-        return this.id;
-    }
-
-    public String translationKey() {
-        return this.translationKey;
+    @Override
+    public int colorFor(BlockState state) {
+        return ARGB.opaque(this.color);
     }
 }

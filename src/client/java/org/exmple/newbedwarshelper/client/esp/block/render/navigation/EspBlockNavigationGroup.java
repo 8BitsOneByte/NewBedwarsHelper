@@ -1,14 +1,14 @@
 package org.exmple.newbedwarshelper.client.esp.block.render.navigation;
 
 import net.minecraft.core.BlockPos;
-import org.exmple.newbedwarshelper.client.esp.block.EspBlockTarget;
+import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockRenderTarget;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public final class EspBlockNavigationGroup {
     private final int id;
-    private final EspBlockTarget target;
+    private final EspBlockRenderTarget target;
     private final Set<Long> positions = new HashSet<>();
     private long sumX;
     private long sumY;
@@ -16,7 +16,7 @@ public final class EspBlockNavigationGroup {
     private int size;
     private boolean oversized;
 
-    EspBlockNavigationGroup(int id, EspBlockTarget target) {
+    EspBlockNavigationGroup(int id, EspBlockRenderTarget target) {
         this.id = id;
         this.target = target;
     }
@@ -41,7 +41,7 @@ public final class EspBlockNavigationGroup {
         return this.id;
     }
 
-    public EspBlockTarget target() {
+    public EspBlockRenderTarget target() {
         return this.target;
     }
 

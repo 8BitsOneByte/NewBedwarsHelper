@@ -24,6 +24,7 @@ public class ModConfig {
     public ItemModelEnhanceConfig itemModelEnhance = new ItemModelEnhanceConfig();
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
     public GammaOverrideConfig gammaOverride = new GammaOverrideConfig();
+    public ToolSwitcherConfig toolSwitcher = new ToolSwitcherConfig();
 
     public static ModConfig getInstance() {
         if (instance == null) {
@@ -91,12 +92,16 @@ public class ModConfig {
         if (gammaOverride == null) {
             gammaOverride = new GammaOverrideConfig();
         }
+        if (toolSwitcher == null) {
+            toolSwitcher = new ToolSwitcherConfig();
+        }
         esp.ensureDefaults();
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
         itemModelEnhance.ensureDefaults();
         statsFetcher.ensureDefaults();
         gammaOverride.ensureDefaults();
+        toolSwitcher.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -201,6 +206,25 @@ public class ModConfig {
         private void ensureDefaults() {
             if (mode == null) {
                 mode = GammaOverrideMode.NIGHT_VISION;
+            }
+        }
+    }
+
+    public static class ToolSwitcherConfig {
+        public Boolean enabled = false;
+        public int minDelayTicks = 3;
+        public int maxDelayTicks = 7;
+
+        private void ensureDefaults() {
+            if (enabled == null) {
+                enabled = false;
+            }
+            minDelayTicks = Math.max(1, minDelayTicks);
+            maxDelayTicks = Math.max(1, maxDelayTicks);
+            if (minDelayTicks > maxDelayTicks) {
+                int previousMin = minDelayTicks;
+                minDelayTicks = maxDelayTicks;
+                maxDelayTicks = previousMin;
             }
         }
     }
