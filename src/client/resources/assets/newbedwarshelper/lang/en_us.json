@@ -1028,5 +1028,11 @@
   "block_target.newbedwarshelper.structure_void": "Structure Void",
   "block_target.newbedwarshelper.turtle_egg": "Turtle Egg",
   "block_target.newbedwarshelper.water": "Water",
-  "block_target.newbedwarshelper.colored_terracotta": "Colored Terracotta"
+  "block_target.newbedwarshelper.colored_terracotta": "Colored Terracotta",
+  "commands.newbedwarshelper.itemprotection.protected": "Protected %s",
+  "commands.newbedwarshelper.itemprotection.already_protected": "%s is already protected",
+  "commands.newbedwarshelper.itemprotection.unprotected": "Unprotected %s",
+  "commands.newbedwarshelper.itemprotection.not_protected": "%s is not protected",
+  "commands.newbedwarshelper.itemprotection.no_item": "Hold an item in your main hand first",
+  "commands.newbedwarshelper.itemprotection.signature_failed": "Unable to identify the held item"
 }

@@ -11,6 +11,7 @@ import org.exmple.newbedwarshelper.client.gui.KeyMappingManager;
 import org.exmple.newbedwarshelper.client.gui.MultilineSystemToast;
 import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceTargetStorage;
 import org.exmple.newbedwarshelper.client.isp.IspTargetStorage;
+import org.exmple.newbedwarshelper.client.itemprotection.ItemProtectionManager;
 import org.exmple.newbedwarshelper.client.itemmodelenhance.ItemScaleRegistry;
 import org.exmple.newbedwarshelper.client.statsfetcher.StatsFetcherAutoWeballTrigger;
 import org.exmple.newbedwarshelper.client.toolswitcher.ToolSwitcherManager;
@@ -33,6 +34,7 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         EspStorageManager.init();
         HitboxEnhanceTargetStorage.init();
         IspTargetStorage.init();
+        ItemProtectionManager.init();
         ItemScaleRegistry.init();
         BedwarsGameDetector.init();
         BedwarsInvisibilityToastNotifier.init();

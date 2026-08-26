@@ -1028,5 +1028,11 @@
   "block_target.newbedwarshelper.structure_void": "结构空位",
   "block_target.newbedwarshelper.turtle_egg": "海龟蛋",
   "block_target.newbedwarshelper.water": "水",
-  "block_target.newbedwarshelper.colored_terracotta": "染色陶瓦"
+  "block_target.newbedwarshelper.colored_terracotta": "染色陶瓦",
+  "commands.newbedwarshelper.itemprotection.protected": "已保护 %s",
+  "commands.newbedwarshelper.itemprotection.already_protected": "%s 已经受到保护",
+  "commands.newbedwarshelper.itemprotection.unprotected": "已取消保护 %s",
+  "commands.newbedwarshelper.itemprotection.not_protected": "%s 尚未受到保护",
+  "commands.newbedwarshelper.itemprotection.no_item": "请先在主手持有一个物品",
+  "commands.newbedwarshelper.itemprotection.signature_failed": "无法识别主手物品"
 }

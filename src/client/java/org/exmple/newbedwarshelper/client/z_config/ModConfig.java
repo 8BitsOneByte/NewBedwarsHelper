@@ -2,13 +2,16 @@ package org.exmple.newbedwarshelper.client.z_config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModConfig {
@@ -25,6 +28,7 @@ public class ModConfig {
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
     public GammaOverrideConfig gammaOverride = new GammaOverrideConfig();
     public ToolSwitcherConfig toolSwitcher = new ToolSwitcherConfig();
+    public ItemProtectionConfig itemProtection = new ItemProtectionConfig();
 
     public static ModConfig getInstance() {
         if (instance == null) {
@@ -95,6 +99,9 @@ public class ModConfig {
         if (toolSwitcher == null) {
             toolSwitcher = new ToolSwitcherConfig();
         }
+        if (itemProtection == null) {
+            itemProtection = new ItemProtectionConfig();
+        }
         esp.ensureDefaults();
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
@@ -102,6 +109,7 @@ public class ModConfig {
         statsFetcher.ensureDefaults();
         gammaOverride.ensureDefaults();
         toolSwitcher.ensureDefaults();
+        itemProtection.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -226,6 +234,32 @@ public class ModConfig {
                 minDelayTicks = maxDelayTicks;
                 maxDelayTicks = previousMin;
             }
+        }
+    }
+
+    public static class ItemProtectionConfig {
+        public List<ItemProtectionRule> rules = new ArrayList<>();
+
+        private void ensureDefaults() {
+            if (rules == null) {
+                rules = new ArrayList<>();
+            }
+            rules.removeIf(rule -> rule == null || rule.itemId == null || rule.matchType == null);
+        }
+    }
+
+    public static class ItemProtectionRule {
+        public String matchType;
+        public String itemId;
+        public JsonElement signature;
+
+        public ItemProtectionRule() {
+        }
+
+        public ItemProtectionRule(String matchType, String itemId, JsonElement signature) {
+            this.matchType = matchType;
+            this.itemId = itemId;
+            this.signature = signature;
         }
     }
 
