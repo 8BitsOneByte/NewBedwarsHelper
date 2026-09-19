@@ -17,10 +17,12 @@ import org.exmple.newbedwarshelper.client.statsfetcher.StatsFetcherAutoWeballTri
 import org.exmple.newbedwarshelper.client.toolswitcher.ToolSwitcherManager;
 import org.exmple.newbedwarshelper.client.utils.AsyncExecutor;
 import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
+import org.exmple.newbedwarshelper.client.waterclutchhelper.WaterClutchManager;
 import org.exmple.newbedwarshelper.client.z_commands.itemmodelenhance.ImeCommand;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WebCommand;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WeballCommand;
 import org.exmple.newbedwarshelper.client.z_debug.blockentityclassification.BlockEntityClassificationDebugger;
+import org.exmple.newbedwarshelper.client.z_debug.waterclutch.WaterClutchDebugger;
 
 public class NewbedwarshelperClient implements ClientModInitializer {
     public static final String NAMESPACE = "newbedwarshelper";
@@ -30,6 +32,7 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         GammaOverrideManager.init();
         KeyMappingManager.init();
         ToolSwitcherManager.init();
+        WaterClutchManager.init();
         MultilineSystemToast.init();
         EspStorageManager.init();
         HitboxEnhanceTargetStorage.init();
@@ -43,8 +46,9 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         WebCommand.register();
         WeballCommand.register();
         ImeCommand.register();
-        // Debug-only classification entry point. Remove this init call before shipping if the helper is not needed.
+        // Debug-only entry points. Comment out or delete these init calls before production runtime.
         BlockEntityClassificationDebugger.init();
+        WaterClutchDebugger.init();
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             EspStorageManager.clearTemporaryOverrides();
             EspStorageManager.clearRuntimeCaches();

@@ -15,6 +15,7 @@ public class MiscConfigScreen extends Screen {
     private static final Component GAMMA_OVERRIDE_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.gamma_override");
     private static final Component BLOCK_ESP_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.block_esp");
     private static final Component TOOL_SWITCHER_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.tool_switcher");
+    private static final Component WATER_CLUTCH_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.misc.water_clutch");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.misc.done");
     private static final int BUTTON_WIDTH = 150;
 
@@ -46,6 +47,9 @@ public class MiscConfigScreen extends Screen {
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(TOOL_SWITCHER_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new ToolSwitcherConfigScreen(this.minecraft, this)))
+                .width(BUTTON_WIDTH)
+                .build(), gridLayout.newCellSettings().paddingTop(5));
+        helper.addChild(Button.builder(WATER_CLUTCH_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new WaterClutchConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())

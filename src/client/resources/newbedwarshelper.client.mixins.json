@@ -28,6 +28,9 @@
     "fireballhelper.LevelRendererFireballHelperMixin",
     "gammaoverride.LightmapRenderStateExtractorMixin",
     "toolswitcher.ClientPacketListenerToolSwitcherDamageMixin",
+    "waterclutchhelper.KeyMappingAccessor",
+    "waterclutchhelper.LevelRendererWaterClutchLandingBeamMixin",
+    "waterclutchhelper.MinecraftUseItemInvoker",
     "enemystatusviewer.PlayerTeamSidebarProtectionMixin",
     "esp.entity.WindChargeOutlineMixin",
     "esp.entity.WitherSkullOutlineMixin"

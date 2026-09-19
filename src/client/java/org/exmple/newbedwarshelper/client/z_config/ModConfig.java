@@ -28,6 +28,7 @@ public class ModConfig {
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
     public GammaOverrideConfig gammaOverride = new GammaOverrideConfig();
     public ToolSwitcherConfig toolSwitcher = new ToolSwitcherConfig();
+    public WaterClutchConfig waterClutch = new WaterClutchConfig();
     public ItemProtectionConfig itemProtection = new ItemProtectionConfig();
 
     public static ModConfig getInstance() {
@@ -99,6 +100,9 @@ public class ModConfig {
         if (toolSwitcher == null) {
             toolSwitcher = new ToolSwitcherConfig();
         }
+        if (waterClutch == null) {
+            waterClutch = new WaterClutchConfig();
+        }
         if (itemProtection == null) {
             itemProtection = new ItemProtectionConfig();
         }
@@ -109,6 +113,7 @@ public class ModConfig {
         statsFetcher.ensureDefaults();
         gammaOverride.ensureDefaults();
         toolSwitcher.ensureDefaults();
+        waterClutch.ensureDefaults();
         itemProtection.ensureDefaults();
     }
 
@@ -245,6 +250,24 @@ public class ModConfig {
                 rules = new ArrayList<>();
             }
             rules.removeIf(rule -> rule == null || rule.itemId == null || rule.matchType == null);
+        }
+    }
+
+    public static class WaterClutchConfig {
+        public Boolean enabled = false;
+        public boolean showPredictedLandingBlock = false;
+        public boolean alwaysSneak = false;
+        public boolean pufferfishBucket = false;
+        public boolean salmonBucket = false;
+        public boolean codBucket = false;
+        public boolean tropicalFishBucket = false;
+        public boolean axolotlBucket = false;
+        public boolean tadpoleBucket = false;
+
+        private void ensureDefaults() {
+            if (enabled == null) {
+                enabled = false;
+            }
         }
     }
 
