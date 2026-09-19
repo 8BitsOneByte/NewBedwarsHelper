@@ -22,6 +22,7 @@ import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public final class ItemProtectionManager {
     }
 
     public static void init() {
+        removeDuplicateConfiguredRules();
         rebuildIndex();
         ItemProtectionCommands.register();
     }
@@ -58,13 +60,13 @@ public final class ItemProtectionManager {
             return true;
         }
 
-        Set<JsonElement> signatures = ruleIndex.componentSignatures().get(itemId);
+        Set<String> signatures = ruleIndex.componentSignatures().get(itemId);
         if (signatures == null || signatures.isEmpty()) {
             return false;
         }
 
-        JsonElement signature = signature(stack);
-        return signature != null && signatures.contains(signature);
+        String signatureKey = signatureKey(stack);
+        return signatureKey != null && signatures.contains(signatureKey);
     }
 
     public static ChangeResult protect(ItemStack stack) {
@@ -161,15 +163,8 @@ public final class ItemProtectionManager {
     }
 
     private static boolean sameRule(ModConfig.ItemProtectionRule first, ModConfig.ItemProtectionRule second) {
-        if (first == null || second == null
-                || !second.matchType.equals(first.matchType)
-                || !second.itemId.equals(first.itemId)) {
-            return false;
-        }
-        if (BLOCK_ITEM_MATCH_TYPE.equals(second.matchType)) {
-            return true;
-        }
-        return second.signature != null && second.signature.equals(first.signature);
+        String firstKey = ruleKey(first);
+        return firstKey != null && firstKey.equals(ruleKey(second));
     }
 
     private static String itemId(ItemStack stack) {
@@ -177,17 +172,30 @@ public final class ItemProtectionManager {
     }
 
     private static JsonElement signature(ItemStack stack) {
+        CachedSignature cached = cachedSignature(stack);
+        return cached == null ? null : cached.signature();
+    }
+
+    private static String signatureKey(ItemStack stack) {
+        CachedSignature cached = cachedSignature(stack);
+        return cached == null ? null : cached.canonicalKey();
+    }
+
+    private static CachedSignature cachedSignature(ItemStack stack) {
         int sourceHash = ItemStack.hashItemAndComponents(stack);
         CachedSignature cached = SIGNATURE_CACHE.get(stack);
         if (cached != null && cached.sourceHash() == sourceHash) {
-            return cached.signature();
+            return cached;
         }
 
         JsonElement signature = createSignature(stack);
-        if (signature != null) {
-            SIGNATURE_CACHE.put(stack, new CachedSignature(sourceHash, signature));
+        if (signature == null) {
+            return null;
         }
-        return signature;
+
+        CachedSignature created = new CachedSignature(sourceHash, signature, canonicalSignature(signature));
+        SIGNATURE_CACHE.put(stack, created);
+        return created;
     }
 
     private static JsonElement createSignature(ItemStack source) {
@@ -280,9 +288,88 @@ public final class ItemProtectionManager {
         }
     }
 
+    private static void removeDuplicateConfiguredRules() {
+        ModConfig config = ModConfig.getInstance();
+        Set<String> seenRules = new HashSet<>();
+        boolean removed = config.itemProtection.rules.removeIf(rule -> {
+            String key = ruleKey(rule);
+            return key != null && !seenRules.add(key);
+        });
+        if (removed) {
+            config.save();
+        }
+    }
+
+    private static String ruleKey(ModConfig.ItemProtectionRule rule) {
+        if (rule == null || rule.matchType == null || rule.itemId == null) {
+            return null;
+        }
+        if (BLOCK_ITEM_MATCH_TYPE.equals(rule.matchType)) {
+            return BLOCK_ITEM_MATCH_TYPE + '\0' + rule.itemId;
+        }
+        if (COMPONENTS_MATCH_TYPE.equals(rule.matchType) && rule.signature != null) {
+            return COMPONENTS_MATCH_TYPE + '\0' + rule.itemId + '\0' + canonicalSignature(rule.signature);
+        }
+        return null;
+    }
+
+    private static String canonicalSignature(JsonElement signature) {
+        StringBuilder builder = new StringBuilder();
+        appendCanonicalJson(signature, builder);
+        return builder.toString();
+    }
+
+    private static void appendCanonicalJson(JsonElement element, StringBuilder builder) {
+        if (element == null || element.isJsonNull()) {
+            builder.append('n');
+            return;
+        }
+        if (element.isJsonArray()) {
+            builder.append('[');
+            for (JsonElement child : element.getAsJsonArray()) {
+                appendCanonicalJson(child, builder);
+            }
+            builder.append(']');
+            return;
+        }
+        if (element.isJsonObject()) {
+            builder.append('{');
+            element.getAsJsonObject().entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> {
+                        appendCanonicalString(entry.getKey(), builder);
+                        appendCanonicalJson(entry.getValue(), builder);
+                    });
+            builder.append('}');
+            return;
+        }
+
+        if (element.getAsJsonPrimitive().isString()) {
+            builder.append('s');
+            appendCanonicalString(element.getAsString(), builder);
+        } else if (element.getAsJsonPrimitive().isBoolean()) {
+            builder.append(element.getAsBoolean() ? "bt" : "bf");
+        } else {
+            builder.append('d').append(canonicalNumber(element.getAsString())).append(';');
+        }
+    }
+
+    private static void appendCanonicalString(String value, StringBuilder builder) {
+        builder.append(value.length()).append(':').append(value);
+    }
+
+    private static String canonicalNumber(String value) {
+        try {
+            BigDecimal number = new BigDecimal(value).stripTrailingZeros();
+            return number.signum() == 0 ? "0" : number.toString();
+        } catch (NumberFormatException exception) {
+            return value;
+        }
+    }
+
     private static void rebuildIndex() {
         Set<String> blockItemIds = new HashSet<>();
-        Map<String, Set<JsonElement>> componentSignatures = new HashMap<>();
+        Map<String, Set<String>> componentSignatures = new HashMap<>();
 
         for (ModConfig.ItemProtectionRule rule : ModConfig.getInstance().itemProtection.rules) {
             if (rule == null || rule.itemId == null || rule.matchType == null) {
@@ -291,11 +378,12 @@ public final class ItemProtectionManager {
             if (BLOCK_ITEM_MATCH_TYPE.equals(rule.matchType)) {
                 blockItemIds.add(rule.itemId);
             } else if (COMPONENTS_MATCH_TYPE.equals(rule.matchType) && rule.signature != null) {
-                componentSignatures.computeIfAbsent(rule.itemId, ignored -> new HashSet<>()).add(rule.signature);
+                componentSignatures.computeIfAbsent(rule.itemId, ignored -> new HashSet<>())
+                        .add(canonicalSignature(rule.signature));
             }
         }
 
-        Map<String, Set<JsonElement>> immutableSignatures = new HashMap<>();
+        Map<String, Set<String>> immutableSignatures = new HashMap<>();
         componentSignatures.forEach((itemId, signatures) -> immutableSignatures.put(itemId, Set.copyOf(signatures)));
         ruleIndex = new RuleIndex(Set.copyOf(blockItemIds), Map.copyOf(immutableSignatures));
         SIGNATURE_CACHE.clear();
@@ -309,10 +397,10 @@ public final class ItemProtectionManager {
         SIGNATURE_FAILED
     }
 
-    private record RuleIndex(Set<String> blockItemIds, Map<String, Set<JsonElement>> componentSignatures) {
+    private record RuleIndex(Set<String> blockItemIds, Map<String, Set<String>> componentSignatures) {
         private static final RuleIndex EMPTY = new RuleIndex(Set.of(), Map.of());
     }
 
-    private record CachedSignature(int sourceHash, JsonElement signature) {
+    private record CachedSignature(int sourceHash, JsonElement signature, String canonicalKey) {
     }
 }
