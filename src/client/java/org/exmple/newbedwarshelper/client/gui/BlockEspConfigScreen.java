@@ -15,7 +15,7 @@ public class BlockEspConfigScreen extends Screen {
     private static final Component TRACER_ON_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.tracer.on");
     private static final Component TRACER_OFF_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.tracer.off");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.done");
-    private static final int BUTTON_WIDTH = 180;
+    private static final int BUTTON_WIDTH = 150;
 
     private final Screen parent;
 

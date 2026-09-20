@@ -18,7 +18,7 @@ public class WaterClutchConfigScreen extends Screen {
     private static final Component BUCKET_ON_TEXT = Component.translatable("screen.newbedwarshelper.water_clutch.bucket.on");
     private static final Component BUCKET_OFF_TEXT = Component.translatable("screen.newbedwarshelper.water_clutch.bucket.off");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.water_clutch.done");
-    private static final int BUTTON_WIDTH = 180;
+    private static final int BUTTON_WIDTH = 150;
 
     private final Screen parent;
 
@@ -32,8 +32,8 @@ public class WaterClutchConfigScreen extends Screen {
         GridLayout gridLayout = new GridLayout();
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper helper = gridLayout.createRowHelper(2);
-        helper.addChild(createEnabledButton(), 2, gridLayout.newCellSettings().paddingTop(50).alignHorizontallyCenter());
-        helper.addChild(createPredictedLandingButton());
+        helper.addChild(createEnabledButton(), gridLayout.newCellSettings().paddingTop(50));
+        helper.addChild(createPredictedLandingButton(), gridLayout.newCellSettings().paddingTop(50));
         helper.addChild(createAlwaysSneakButton());
         addBucketButton(helper, MobBucketOption.PUFFERFISH);
         addBucketButton(helper, MobBucketOption.SALMON);

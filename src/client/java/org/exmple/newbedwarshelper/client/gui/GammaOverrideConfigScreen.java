@@ -22,7 +22,7 @@ public class GammaOverrideConfigScreen extends Screen {
     private static final Component MODE_INVALID_GAMMA_TEXT = Component.translatable("screen.newbedwarshelper.gamma_override.mode.invalid_gamma");
     private static final Component SHADER_INCOMPATIBLE_TOOLTIP = Component.translatable("screen.newbedwarshelper.gamma_override.mode.invalid_gamma.shader_incompatible").withStyle(ChatFormatting.RED);
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.gamma_override.done");
-    private static final int BUTTON_WIDTH = 180;
+    private static final int BUTTON_WIDTH = 150;
 
     private final Screen parent;
 
